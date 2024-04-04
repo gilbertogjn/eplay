@@ -8,11 +8,10 @@ import {
   Sidebar
 } from './styles'
 
-import starWars from '../../assets/images/star_wars.png'
 import Tag from '../Tag'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootReducer } from '../../store'
-import { close } from '../../store/reducers/cart'
+import { close, remove } from '../../store/reducers/cart'
 import { formatPrices } from '../ProductsList'
 
 const Cart = () => {
@@ -30,6 +29,10 @@ const Cart = () => {
     }, 0)
   }
 
+  const removeItem = (id: number) => {
+    dispatch(remove(id))
+  }
+
   return (
     <CartContainer className={isOpen ? 'is-open' : ''}>
       <Overlay onClick={closeCart} />
@@ -44,7 +47,7 @@ const Cart = () => {
                 <Tag>{item.details.system}</Tag>
                 <span>{formatPrices(item.prices.current)}</span>
               </div>
-              <button type="button" />
+              <button onClick={() => removeItem(item.id)} type="button" />
             </CartItem>
           ))}
         </ul>
