@@ -7,9 +7,11 @@ import boleto from '../../assets/images/boleto.png'
 import card from '../../assets/images/cartao.png'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
+import { usePurchaseMutation } from '../../services/api'
 
 const Checkout = () => {
   const [payWithCard, setPayWithCard] = useState(false)
+  const [purchase, { isLoading, isError, data }] = usePurchaseMutation()
 
   const form = useFormik({
     initialValues: {
@@ -69,7 +71,39 @@ const Checkout = () => {
         .required('O campo é obrigatório')
     }),
     onSubmit: (values) => {
-      console.log(values)
+      purchase({
+        billing: {
+          document: values.cpf,
+          email: values.email,
+          name: values.fullName
+        },
+        delivery: {
+          email: values.deliveryEmail
+        },
+        payment: {
+          installments: 1,
+          card: {
+            active: payWithCard,
+            code: Number(values.cardCode),
+            name: values.cardDisplayName,
+            number: values.cardNumber,
+            owner: {
+              document: values.cpfCardOwner,
+              name: values.cardOwner
+            },
+            expires: {
+              month: 1,
+              year: 2024
+            }
+          }
+        },
+        products: [
+          {
+            id: 1,
+            price: 10
+          }
+        ]
+      })
     }
   })
 
@@ -110,7 +144,13 @@ const Checkout = () => {
             </InputGroup>
             <InputGroup>
               <label htmlFor="cpf">CPF</label>
-              <input id="cpf" type="text" name="cpf" value={form.values.cpf} />
+              <input
+                id="cpf"
+                type="text"
+                name="cpf"
+                value={form.values.cpf}
+                onChange={form.handleChange}
+              />
               <small>{getErrorMessage('cpf', form.errors.fullName)}</small>
             </InputGroup>
           </Row>
@@ -134,7 +174,7 @@ const Checkout = () => {
               <input
                 type="email"
                 id="confirmDeliveryEmail"
-                name="deliveryEmail"
+                name="confirmDeliveryEmail"
                 value={form.values.confirmDeliveryEmail}
                 onChange={form.handleChange}
               />
@@ -148,16 +188,13 @@ const Checkout = () => {
       <Card title="Pagamento">
         <>
           <TabButton
-            isActive={!payWithCard}
+            active={!payWithCard}
             onClick={() => setPayWithCard(false)}
           >
             <img src={boleto} alt="Boleto" />
             Boleto Bancário
           </TabButton>
-          <TabButton
-            isActive={payWithCard}
-            onClick={() => setPayWithCard(true)}
-          >
+          <TabButton active={payWithCard} onClick={() => setPayWithCard(true)}>
             <img src={card} alt="Cartão de crédito" />
             Cartão de crédito
           </TabButton>
@@ -283,7 +320,11 @@ const Checkout = () => {
           </div>
         </>
       </Card>
-      <Button type="button" title="Clique aqui para finalizar a compra">
+      <Button
+        type="button"
+        onClick={form.handleSubmit}
+        title="Clique aqui para finalizar a compra"
+      >
         Finalizar compra
       </Button>
     </form>
