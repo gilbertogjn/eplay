@@ -91,7 +91,7 @@ export const HeaderRow = styled.div`
       justify-content: space-between;
 
       ${Links} {
-        display: none;
+        display: flex;
       }
     }
   }

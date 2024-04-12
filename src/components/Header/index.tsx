@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { HashLink } from 'react-router-hash-link'
 
 import {
   HeaderBar,
@@ -42,13 +43,28 @@ const Header = () => {
           <nav>
             <Links>
               <LinkItem>
-                <Link to="/categories">Categorias</Link>
+                <Link
+                  title="Clique aqui para acessar a página de categorias"
+                  to="/categories"
+                >
+                  Categorias
+                </Link>
               </LinkItem>
               <LinkItem>
-                <a href="#">Novidades</a>
+                <HashLink
+                  title="Clique aqui para acessar a seção de em breve"
+                  to="/#coming-sson"
+                >
+                  Em breve
+                </HashLink>
               </LinkItem>
               <LinkItem>
-                <a href="#">Promoções</a>
+                <HashLink
+                  title="Clique aqui para acessar a seção de promoções"
+                  to="/#on-sale"
+                >
+                  Promoções
+                </HashLink>
               </LinkItem>
             </Links>
           </nav>
