@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import * as Yup from 'yup'
 import { useFormik } from 'formik'
+import { useDispatch, useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'
 import InputMask from 'react-input-mask'
-import * as Yup from 'yup'
 
 import Button from '../../components/Button'
 import Card from '../../components/Card'
 
 import barCode from '../../assets/images/boleto.png'
-import card from '../../assets/images/cartao.png'
+import creditCard from '../../assets/images/cartao.png'
 
 import { usePurchaseMutation } from '../../services/api'
 
@@ -27,7 +27,7 @@ type Installment = {
 
 const Checkout = () => {
   const [payWithCard, setPayWithCard] = useState(false)
-  const [purchase, { isSuccess, isLoading, data }] = usePurchaseMutation()
+  const [purchase, { data, isSuccess, isLoading }] = usePurchaseMutation()
   const { items } = useSelector((state: RootReducer) => state.cart)
   const [installments, setInstallments] = useState<Installment[]>([])
   const dispatch = useDispatch()
@@ -51,22 +51,21 @@ const Checkout = () => {
       installments: 1
     },
     validationSchema: Yup.object({
-      fullname: Yup.string()
+      fullName: Yup.string()
         .min(5, 'O nome precisa ter pelo menos 5 caracteres')
         .required('O campo é obrigatório'),
       email: Yup.string()
         .email('E-mail inválido')
         .required('O campo é obrigatório'),
       cpf: Yup.string()
-        .min(14, 'O campo precisar ter 14 caracteres')
-        .max(14, 'O campo precisar ter 14 caracteres')
-        .email('E-mail inválido')
+        .min(14, 'O campo precisa ter 14 caracteres')
+        .max(15, 'O campo precisa ter 14 caracteres')
         .required('O campo é obrigatório'),
       deliveryEmail: Yup.string()
         .email('E-mail inválido')
         .required('O campo é obrigatório'),
       confirmDeliveryEmail: Yup.string()
-        .oneOf([Yup.ref('deliveryEmail')], 'Os email são diferentes')
+        .oneOf([Yup.ref('deliveryEmail')], 'Os e-mails são diferentes')
         .required('O campo é obrigatório'),
 
       cardOwner: Yup.string().when((values, schema) =>
@@ -78,6 +77,9 @@ const Checkout = () => {
       cardDisplayName: Yup.string().when((values, schema) =>
         payWithCard ? schema.required('O campo é obrigatório') : schema
       ),
+      cardNumber: Yup.string().when((values, schema) =>
+        payWithCard ? schema.required('O campo é obrigatório') : schema
+      ),
       expiresMonth: Yup.string().when((values, schema) =>
         payWithCard ? schema.required('O campo é obrigatório') : schema
       ),
@@ -87,9 +89,9 @@ const Checkout = () => {
       cardCode: Yup.string().when((values, schema) =>
         payWithCard ? schema.required('O campo é obrigatório') : schema
       ),
-      installments: Yup.number()
-        .min(5, 'O campo precisa ter pelo menos 5 caracteres')
-        .required('O campo é obrigatório')
+      installments: Yup.number().when((values, schema) =>
+        payWithCard ? schema.required('O campo é obrigatório') : schema
+      )
     }),
     onSubmit: (values) => {
       purchase({
@@ -193,7 +195,7 @@ const Checkout = () => {
               Pedimos que verifique sua caixa de entrada e a pasta de spam para
               garantir que receba nossa comunicação. Caso tenha alguma dúvida ou
               necessite de mais informações, por favor, entre em contato conosco
-              através dos nossos canais de atendimento ao cliente.
+              através dos nossos canais de atendimento ao cliente
             </p>
             <p className="margin-top">
               Agradecemos por escolher a EPLAY e esperamos que desfrute do seu
@@ -214,7 +216,8 @@ const Checkout = () => {
                     name="fullName"
                     value={form.values.fullName}
                     onChange={form.handleChange}
-                    className={checkInputHasError('fullname') ? 'error' : ''}
+                    onBlur={form.handleBlur}
+                    className={checkInputHasError('fullName') ? 'error' : ''}
                   />
                 </S.InputGroup>
                 <S.InputGroup>
@@ -225,6 +228,7 @@ const Checkout = () => {
                     name="email"
                     value={form.values.email}
                     onChange={form.handleChange}
+                    onBlur={form.handleBlur}
                     className={checkInputHasError('email') ? 'error' : ''}
                   />
                 </S.InputGroup>
@@ -236,6 +240,7 @@ const Checkout = () => {
                     name="cpf"
                     value={form.values.cpf}
                     onChange={form.handleChange}
+                    onBlur={form.handleBlur}
                     className={checkInputHasError('cpf') ? 'error' : ''}
                     mask="999.999.999-99"
                   />
@@ -253,6 +258,7 @@ const Checkout = () => {
                     name="deliveryEmail"
                     value={form.values.deliveryEmail}
                     onChange={form.handleChange}
+                    onBlur={form.handleBlur}
                     className={
                       checkInputHasError('deliveryEmail') ? 'error' : ''
                     }
@@ -268,6 +274,7 @@ const Checkout = () => {
                     name="confirmDeliveryEmail"
                     value={form.values.confirmDeliveryEmail}
                     onChange={form.handleChange}
+                    onBlur={form.handleBlur}
                     className={
                       checkInputHasError('confirmDeliveryEmail') ? 'error' : ''
                     }
@@ -279,19 +286,19 @@ const Checkout = () => {
           <Card title="Pagamento">
             <>
               <S.TabButton
-                active={!payWithCard}
+                isActive={!payWithCard}
                 onClick={() => setPayWithCard(false)}
                 type="button"
               >
                 <img src={barCode} alt="Boleto" />
-                Boleto Bancário
+                Boleto bancário
               </S.TabButton>
               <S.TabButton
-                active={payWithCard}
+                isActive={payWithCard}
                 onClick={() => setPayWithCard(true)}
                 type="button"
               >
-                <img src={card} alt="Cartão de crédito" />
+                <img src={creditCard} alt="Cartão de crédito" />
                 Cartão de crédito
               </S.TabButton>
               <div className="margin-top">
@@ -331,6 +338,8 @@ const Checkout = () => {
                           mask="999.999.999-99"
                         />
                       </S.InputGroup>
+                    </S.Row>
+                    <S.Row marginTop="24px">
                       <S.InputGroup>
                         <label htmlFor="cardDisplayName">Nome no cartão</label>
                         <input
@@ -361,7 +370,7 @@ const Checkout = () => {
                         />
                       </S.InputGroup>
                       <S.InputGroup maxWidth="123px">
-                        <label htmlFor="expiresMonth">Mês do vencimento</label>
+                        <label htmlFor="expiresMonth">Mês de expiração</label>
                         <InputMask
                           type="text"
                           id="expiresMonth"
@@ -376,7 +385,7 @@ const Checkout = () => {
                         />
                       </S.InputGroup>
                       <S.InputGroup maxWidth="123px">
-                        <label htmlFor="expiresYear">Ano de vencimento</label>
+                        <label htmlFor="expiresYear">Ano de expiração</label>
                         <InputMask
                           type="text"
                           id="expiresYear"

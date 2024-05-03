@@ -10,12 +10,12 @@ type RowProps = {
 }
 
 type TabButtonProps = {
-  active: boolean
+  isActive: boolean
 }
 
 export const Row = styled.div<RowProps>`
   display: flex;
-  gap: 24px;
+  column-gap: 24px;
   margin-top: ${(props) => props.marginTop || '0'};
   align-items: flex-end;
 
@@ -38,9 +38,9 @@ export const InputGroup = styled.div<InputGroupProps>`
   input,
   select {
     background-color: ${colors.white};
+    border: 1px solid ${colors.white};
     height: 32px;
     padding: 0 8px;
-    border: 1px solid ${colors.white};
     width: 100%;
 
     &.error {
@@ -58,7 +58,8 @@ export const TabButton = styled.button<TabButtonProps>`
   font-size: 14px;
   font-weight: bold;
   color: ${colors.white};
-  background-color: ${(props) => (props.active ? colors.green : colors.black)};
+  background-color: ${(props) =>
+    props.isActive ? colors.green : colors.black};
   height: 32px;
   border: none;
   margin-right: 16px;
